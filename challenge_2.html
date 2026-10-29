@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Challenge 02 | Frugal Agentic AI</title>
+<style>
+:root{
+  --navy:#071a30;--navy2:#0c2947;--orange:#ff7417;--orange-dark:#b94b16;
+  --orange-pale:#fff2e7;--ink:#102f53;--body:#456582;--line:#ffd2ae;
+  --paper:#fffaf6;--white:#fff;--shadow:0 12px 30px rgba(13,42,70,.08)
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:#f7fafd;color:var(--ink);font-family:Inter,"Segoe UI",Arial,sans-serif;line-height:1.5}
+a{color:inherit}
+.container{width:min(1420px,calc(100% - 48px));margin:auto}
+header{position:sticky;top:0;z-index:20;background:var(--navy);border-bottom:1px solid #29425a;color:#fff}
+.nav{min-height:70px;display:flex;align-items:center;justify-content:space-between;gap:24px}
+.brand{font-size:19px;font-weight:800;text-decoration:none;white-space:nowrap}
+.brand span{color:var(--orange)}
+.navlinks{display:flex;align-items:center;gap:25px}
+.navlinks a{font-size:13px;font-weight:700;text-decoration:none;color:#f1f5fa}
+.navlinks a:hover{color:#ffad72}
+
+/* Header layout fix: brand, navigation and CTA occupy separate flex items. */
+.navlinks{display:flex;align-items:center;justify-content:center;gap:clamp(12px,1.8vw,25px);flex:1;min-width:0}
+.navlinks a{white-space:nowrap;text-decoration:none}
+.nav-cta{flex-shrink:0}
+@media(max-width:900px){
+  .nav{gap:14px}
+  .brand{font-size:17px}
+  .navlinks{gap:11px}
+  .navlinks a{font-size:12px}
+}
+
+.btn{display:inline-flex;justify-content:center;align-items:center;padding:12px 18px;border-radius:10px;text-decoration:none;font-size:13px;font-weight:800;border:1px solid transparent;cursor:pointer}
+.btn-orange{background:var(--orange);color:#fff}
+.btn-orange:hover{background:#ff8735}
+.btn-outline{border-color:#fff8;color:#fff;background:transparent}
+.hero{background:radial-gradient(circle at 77% 42%,#f8791728,transparent 26%),radial-gradient(circle at 88% 72%,#087be82a,transparent 30%),linear-gradient(112deg,#06172a,#0c2745 62%,#111e32);color:#fff;overflow:hidden}
+.hero-inner{display:grid;grid-template-columns:1.05fr .95fr;align-items:center;gap:38px;min-height:355px;padding:42px 0}
+.pill{display:inline-block;background:var(--orange);border-radius:999px;color:#fff;padding:6px 12px;font-size:11px;font-weight:900;letter-spacing:.4px}
+.eyebrow{display:flex;align-items:center;gap:10px;margin:14px 0 10px;color:#ff8b3c;font-size:12px;letter-spacing:1.2px;font-weight:900}
+.eyebrow:before{content:"";width:22px;height:2px;background:var(--orange)}
+h1{font-size:clamp(38px,4.5vw,60px);line-height:1.02;letter-spacing:-1.6px;margin:0 0 14px;max-width:650px}
+.hero p{font-size:16px;color:#e3edf8;max-width:670px;margin:0 0 17px}
+.draft{display:inline-flex;align-items:center;flex-wrap:wrap;gap:8px;border:1px solid #ffffff4d;border-radius:11px;padding:9px 12px;background:#04122248;font-size:12px;color:#eaf2fb}
+.draft strong{color:#ff9b51}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--orange)}
+/* SVG is used so the agent nodes and connector endpoints remain aligned */
+.agent-diagram{width:100%;max-width:540px;justify-self:center}
+.agent-diagram svg{display:block;width:100%;height:auto;overflow:visible}
+.section{padding:22px 0}
+.overview{background:#fff;padding:22px 0 24px}
+.overview-grid{display:grid;grid-template-columns:1.45fr 1fr 1.08fr .92fr;gap:0;border:1px solid #ffe0c8;border-radius:14px;background:linear-gradient(100deg,#fff 0%,#fffaf6 100%);box-shadow:var(--shadow);overflow:hidden}
+.panel{padding:19px 18px;min-width:0}
+.panel+.panel{border-left:1px solid #ffd9bf}
+h2,h3,h4{line-height:1.2}
+h2{font-size:28px;letter-spacing:-.5px;margin:0 0 8px}
+h3{font-size:16px;margin:0 0 10px}
+h4{font-size:13px;margin:0 0 5px}
+p{margin-top:0}
+.muted{color:var(--body)}
+.small{font-size:12px}
+.orange-tag{display:inline-block;background:var(--orange);color:white;border-radius:999px;padding:5px 10px;font-size:10px;font-weight:900;letter-spacing:.5px;text-transform:uppercase;margin-bottom:8px}
+.note{display:flex;gap:9px;align-items:flex-start;background:#fff0e4;border:1px solid #ffd2ae;color:#74482c;border-radius:8px;padding:10px 11px;font-size:11px;margin-top:12px}
+.note-icon{display:grid;place-items:center;flex:0 0 24px;height:24px;border-radius:50%;background:var(--orange);color:#fff;font-weight:900}
+.question{background:#fff0e4;border:1px solid #ffe0c8;border-radius:9px;padding:14px;font-size:13px;color:#6c4428}
+.nodes{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.node{background:#fff9f3;border:1px solid #ffd2ae;border-radius:8px;text-align:center;padding:8px 5px;font-size:11px;color:#315777}
+.router{grid-column:1/-1;justify-self:center;background:var(--orange);color:#fff;border-radius:7px;padding:8px 15px;font-weight:800;font-size:11px}
+.node.wide{grid-column:1/-1;justify-self:center;width:52%}
+.key{display:flex;gap:9px;margin:11px 0;font-size:11px;color:var(--body)}
+.num{flex:0 0 27px;height:27px;display:grid;place-items:center;background:#ffe6d4;color:var(--orange-dark);border-radius:50%;font-weight:900}
+.three-cards{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;padding:22px 0}
+.info-card{background:#fff;border:1px solid var(--line);border-radius:12px;padding:19px;box-shadow:var(--shadow)}
+.check{font-size:12px;color:var(--body);margin:8px 0}
+.check b{color:var(--orange-dark)}
+.cost-section{padding:0 0 20px;background:linear-gradient(#fff,#fff8f1)}
+.cost-panel{border:1px solid #ffc99f;border-radius:14px;background:linear-gradient(110deg,#fff1e5 0%,#fffaf6 60%,#fff0e4 100%);box-shadow:var(--shadow);padding:20px}
+.cost-grid{display:grid;grid-template-columns:1.6fr .95fr .95fr;gap:0}
+.cost-col{padding:0 22px;min-width:0}
+.cost-col:first-child{padding-left:0}
+.cost-col:last-child{padding-right:0}
+.cost-col+.cost-col{border-left:1px solid #ffcba8}
+.cost-title{font-size:30px;margin:0 0 5px}
+.lead{font-size:14px;color:#315777;margin-bottom:13px;max-width:600px}
+.task-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.task{background:#fff;border:1px solid #ffd2ae;border-radius:9px;padding:12px;min-width:0}
+.task-icon{width:34px;height:34px;display:grid;place-items:center;border-radius:50%;background:#ffe7d5;color:var(--orange-dark);font-size:17px;font-weight:900;margin-bottom:8px}
+.task p{font-size:11px;color:var(--body);margin:0}
+.how{display:flex;gap:10px;align-items:flex-start;margin:13px 0}
+.round{flex:0 0 38px;width:38px;height:38px;display:grid;place-items:center;border-radius:50%;background:#fff;border:1px solid #ffc99f;color:var(--orange-dark);font-weight:900;font-size:16px}
+.how p{font-size:11px;color:var(--body);margin:0}
+.timeline{border:1px solid #ffd2ae;background:#ffffff8c;border-radius:9px;padding:12px;font-size:11px;color:#67472f}
+.timeline strong{color:var(--orange-dark)}
+.timeline .subnote{border:1px solid #ffdcc3;border-radius:7px;padding:9px;margin-top:9px;background:#fff8f2}
+.bottom-cta{padding:0 0 24px;background:#fff8f1}
+.cta{display:flex;justify-content:space-between;align-items:center;gap:20px;padding:19px 24px;border-radius:13px;color:#fff;background:radial-gradient(circle at 75% 20%,#ff9b3838,transparent 27%),linear-gradient(105deg,#321e19,#963b19 62%,#c84e14);box-shadow:var(--shadow)}
+.cta-left{display:flex;align-items:center;gap:15px}
+.cta-icon{flex:0 0 48px;width:48px;height:48px;border:1px solid #ffb17a;border-radius:50%;display:grid;place-items:center;font-size:23px}
+.cta h3{margin:0 0 4px;font-size:17px}
+.cta p{margin:0;font-size:12px;color:#fff0e5}
+.cta-actions{display:flex;gap:10px;flex-shrink:0}
+footer{background:var(--navy);color:#d9e8f7;padding:17px 0;font-size:12px}
+.footer-inner{display:flex;justify-content:space-between;gap:12px}
+footer a{color:#ffb37c;text-decoration:none}
+@media(max-width:1100px){
+ .navlinks{gap:13px}.overview-grid{grid-template-columns:1fr 1fr}.panel+.panel{border-left:0}.panel:nth-child(even){border-left:1px solid #ffd9bf}.panel:nth-child(n+3){border-top:1px solid #ffd9bf}
+ .cost-grid{grid-template-columns:1.3fr 1fr}.cost-col:last-child{grid-column:1/-1;border-left:0;border-top:1px solid #ffcba8;margin-top:17px;padding:17px 0 0}.cost-col:nth-child(2){border-left:1px solid #ffcba8}
+}
+@media(max-width:760px){
+ .container{width:calc(100% - 28px)}.nav{padding:12px 0;align-items:flex-start;flex-direction:column;gap:10px}.navlinks{width:100%;max-width:100%;overflow-x:auto;justify-content:flex-start;padding-bottom:4px;flex:none}.navlinks a{white-space:nowrap;font-size:11px}.nav-cta{display:inline-flex}
+ .hero-inner{grid-template-columns:1fr;padding:34px 0;gap:15px}.hero p{font-size:15px}.agent-diagram{max-width:440px}
+ .overview-grid,.three-cards,.cost-grid{grid-template-columns:1fr}.panel,.panel+.panel,.panel:nth-child(even){border-left:0;border-top:1px solid #ffd9bf}.panel:first-child{border-top:0}
+ .three-cards{gap:12px}.cost-col,.cost-col:first-child,.cost-col:last-child{padding:16px 0}.cost-col:first-child{padding-top:0}.cost-col+.cost-col,.cost-col:nth-child(2),.cost-col:last-child{border-left:0;border-top:1px solid #ffcba8;margin-top:12px}
+ .task-grid{grid-template-columns:1fr}.task{display:grid;grid-template-columns:38px 1fr;column-gap:10px;align-items:center}.task-icon{grid-row:1/3;margin:0}.task h4{margin:0}.task p{grid-column:2}
+ .cta{align-items:flex-start;flex-direction:column}.cta-actions{flex-wrap:wrap}.footer-inner{flex-direction:column}
+}
+</style>
+</head>
+<body>
+<header>
+  <div class="container nav">
+    <a class="brand" href="index.html">Agentic AI <span>Grand Challenges</span></a>
+    <nav class="navlinks" aria-label="Main navigation">
+      <a href="index.html#why">Why This Programme</a>
+      <a href="index.html#challenges">Challenges</a>
+      <a href="index.html#outcomes">Outcomes</a>
+      <a href="index.html#partners">Partners</a>
+      <a href="index.html#committees">Committees</a>
+    </nav>
+    <a class="btn btn-orange nav-cta" href="https://forms.gle/bVyVHYtxqCeCGmKs7">Express Interest</a>
+  </div>
+</header>
+<main id="top">
+<section class="hero" id="challenges">
+  <div class="container hero-inner">
+    <div>
+      <span class="pill">Challenge 02</span>
+      <div class="eyebrow">Frugal Agentic AI</div>
+      <h1>The Frugal Agentic AI Challenge</h1>
+      <p>Can a team of cooperating AI agents deliver useful answers while minimising energy consumption and communication on a small network of low-power computers?</p>
+      <div class="draft"><span class="dot"></span><strong>Draft specification v0.1</strong><span>|</span> Subject to review by the challenge chairs</div>
+    </div>
+    <div class="agent-diagram">
+      <svg viewBox="0 0 520 320" role="img" aria-label="Orchestrator coordinating four agents around a central network node">
+        <defs>
+          <radialGradient id="glow"><stop offset="0" stop-color="#2776b5" stop-opacity=".24"/><stop offset="1" stop-color="#2776b5" stop-opacity="0"/></radialGradient>
+          <linearGradient id="core" x1="0" x2="1" y1="0" y2="1"><stop stop-color="#8bd8ff"/><stop offset="1" stop-color="#346a9b"/></linearGradient>
+        </defs>
+        <circle cx="260" cy="164" r="150" fill="url(#glow)"/>
+        <circle cx="260" cy="164" r="104" fill="none" stroke="#5e9ac4" stroke-opacity=".22"/>
+        <!-- All connector endpoints meet the edge of the central node or each agent circle. -->
+        <g fill="none" stroke-width="2.2" stroke-dasharray="5 5">
+          <path d="M260 88 L260 143" stroke="#159dff"/>
+          <path d="M184 150 L231 164" stroke="#00d7ef"/>
+          <path d="M336 150 L289 164" stroke="#75df36"/>
+          <path d="M214 220 L244 185" stroke="#ff9c28"/>
+          <path d="M306 220 L276 185" stroke="#d15aff"/>
+        </g>
+        <g font-family="Segoe UI,Arial,sans-serif" text-anchor="middle">
+          <g>
+            <circle cx="260" cy="54" r="43" fill="#0c2947" stroke="#159dff" stroke-width="2"/>
+            <text x="260" y="45" font-size="23" fill="#159dff">▤</text>
+            <text x="260" y="67" font-size="12" font-weight="700" fill="#fff">Orchestrator</text>
+          </g>
+          <g>
+            <circle cx="138" cy="145" r="41" fill="#0c2947" stroke="#00d7ef" stroke-width="2"/>
+            <text x="138" y="139" font-size="22" fill="#00d7ef">♙</text><text x="138" y="160" font-size="12" font-weight="700" fill="#fff">Agent 1</text>
+          </g>
+          <g>
+            <circle cx="382" cy="145" r="41" fill="#0c2947" stroke="#75df36" stroke-width="2"/>
+            <text x="382" y="139" font-size="22" fill="#75df36">▥</text><text x="382" y="160" font-size="12" font-weight="700" fill="#fff">Agent 2</text>
+          </g>
+          <g>
+            <circle cx="205" cy="246" r="41" fill="#0c2947" stroke="#ff9c28" stroke-width="2"/>
+            <text x="205" y="240" font-size="22" fill="#ff9c28">⚙</text><text x="205" y="261" font-size="12" font-weight="700" fill="#fff">Agent 3</text>
+          </g>
+          <g>
+            <circle cx="315" cy="246" r="41" fill="#0c2947" stroke="#d15aff" stroke-width="2"/>
+            <text x="315" y="240" font-size="22" fill="#d15aff">✿</text><text x="315" y="261" font-size="12" font-weight="700" fill="#fff">Agent 4</text>
+          </g>
+        </g>
+        <polygon points="260,143 281,164 260,185 239,164" fill="url(#core)" stroke="#b9e7ff" stroke-width="1.5"/>
+        <polygon points="260,151 273,164 260,177 247,164" fill="#b8e6ff" opacity=".58"/>
+      </svg>
+    </div>
+  </div>
+</section>
+
+<section class="overview" id="why">
+ <div class="container overview-grid">
+  <article class="panel">
+    <span class="orange-tag">Part A</span><h3>Resource-efficient multi-agent systems</h3>
+    <p class="muted small">The challenge explores how to build agent systems that can deliver useful and reliable results while operating efficiently on a small network of low-power devices. The focus is on minimising energy consumption and communication overhead, without compromising output quality.</p>
+    <div class="note"><span class="note-icon">♧</span><span>This challenge uses five low-power nodes (e.g. Raspberry Pi 5), with model weights selected by the organisers and an isolated network.</span></div>
+  </article>
+  <article class="panel">
+    <h3>◉ &nbsp; The central question</h3>
+    <div class="question">How can AI agents complete useful tasks while minimising energy and communication on a small network of low-power computers?</div>
+  </article>
+  <article class="panel">
+    <h3>The low-power network</h3>
+    <div class="nodes">
+      <div class="node">▦ &nbsp; Node 1 (LLM)</div><div class="node">▦ &nbsp; Node 2 (LLM)</div>
+      <div class="router">Router / Coordinator</div>
+      <div class="node">▦ &nbsp; Node 3 (LLM)</div><div class="node">▦ &nbsp; Node 4 (LLM)</div>
+      <div class="node wide">▦ &nbsp; Node 5 (LLM)</div>
+    </div>
+  </article>
+  <article class="panel">
+    <h3>Key tasks</h3>
+    <div class="key"><span class="num">1</span><span>Design and implement agent systems that run efficiently on low-power devices.</span></div>
+    <div class="key"><span class="num">2</span><span>Minimise energy usage and communication overhead.</span></div>
+    <div class="key"><span class="num">3</span><span>Deliver useful, reliable outputs across a range of tasks.</span></div>
+  </article>
+ </div>
+</section>
+
+<section class="section">
+ <div class="container three-cards">
+  <article class="info-card">
+    <h3>Tasks</h3><p class="muted small">Two proposed tasks</p>
+    <h4>01 &nbsp; Single query</h4><p class="muted small">Answer independent prompts, such as questions about passages, summaries and drafting tasks.</p>
+    <h4>02 &nbsp; Multi-turn conversation</h4><p class="muted small">Handle a scripted conversation with evolving requirements and retain relevant context.</p>
+    <div class="note">Task details, example prompts and constraints remain subject to review.</div>
+  </article>
+  <article class="info-card">
+    <h3>Submission requirements</h3><p class="muted small">What teams will submit</p>
+    <p class="check"><b>✓</b> Setup code for the orchestrator and four agents</p>
+    <p class="check"><b>✓</b> Connection self-test</p>
+    <p class="check"><b>✓</b> Orchestrator implementing the challenge API</p>
+    <p class="check"><b>✓</b> Configuration (roles, prompts, routing, memory)</p>
+    <p class="check"><b>✓</b> Method description (maximum 2 pages)</p>
+    <div class="note">Model weights are provided by the organisers. Packaging, dependencies and size limits are TBD.</div>
+  </article>
+  <article class="info-card">
+    <h3>Evaluation</h3><p class="muted small">What will be measured (proposed)</p>
+    <h4>Energy consumption</h4><p class="muted small">Total system energy, including nodes and switch.</p>
+    <h4>Inter-agent communication</h4><p class="muted small">Messages delivered and data transferred.</p>
+    <h4>Answer quality</h4><p class="muted small">Useful responses, with a proposed minimum threshold.</p>
+    <h4>Response time and behaviour</h4><p class="muted small">Latency, idle power and token usage.</p>
+    <div class="note">Scoring, thresholds and measurement settings need committee agreement.</div>
+  </article>
+ </div>
+</section>
+
+<section class="cost-section" id="cost-aware">
+ <div class="container">
+  <div class="cost-panel">
+   <div class="cost-grid">
+    <div class="cost-col">
+     <span class="orange-tag">Sub-challenge</span>
+     <h2 class="cost-title">Cost-Aware Agentic AI</h2>
+     <p class="lead">How can AI agents complete useful business workflows at lower execution cost while maintaining quality and reliability?</p>
+     <h3>Proposed task families</h3>
+     <div class="task-grid">
+      <article class="task"><div class="task-icon">&lt;/&gt;</div><h4>Coding</h4><p>Fix defects, build features and work with code repositories.</p></article>
+      <article class="task"><div class="task-icon">▦</div><h4>Documents &amp; spreadsheets</h4><p>Analyse records, create reports and work with structured data.</p></article>
+      <article class="task"><div class="task-icon">⌕</div><h4>Evidence gathering</h4><p>Answer questions using reliable and traceable sources.</p></article>
+     </div>
+     <div class="note"><span class="note-icon">i</span><span>This track measures API and paid-tool expenditure. It does not establish total ownership cost, energy use or carbon savings; those are outside the initial track.</span></div>
+    </div>
+    <div class="cost-col">
+     <h3>How it works</h3>
+     <div class="how"><div class="round">▤</div><p>Agent systems complete predefined business workflows, including coding, document work and evidence gathering.</p></div>
+     <div class="how"><div class="round">£</div><p>Execution cost is measured through API usage and paid-tool expenditure.</p></div>
+     <div class="how"><div class="round">✓</div><p>Cost comparisons apply to systems that meet the required quality standard.</p></div>
+     <div class="how"><div class="round">↻</div><p>Proposed outputs include a validated benchmark, reference implementations and independently rerun results.</p></div>
+    </div>
+    <div class="cost-col">
+     <h3>Proposed timeline &amp; status</h3>
+     <div class="timeline"><strong>March 2027 — proposed</strong><p style="margin:5px 0 0">Validated benchmark and baseline demonstration.</p><div class="subnote">A ranked competition will proceed only if evaluation infrastructure, task set, funding and entrant timetable are ready.</div></div>
+     <div class="note"><span class="note-icon">!</span><span><strong>Important distinction:</strong> This sub-challenge measures execution expenditure, not energy or carbon. Exact rules, thresholds, funding and other numerical limits require steering agreement before publication.</span></div>
+    </div>
+   </div>
+  </div>
+ </div>
+</section>
+
+<section class="bottom-cta" id="interest">
+ <div class="container">
+  <div class="cta">
+   <div class="cta-left"><div class="cta-icon">♧</div><div><h3>Interested in Challenge 02?</h3><p>Register your interest to receive updates as the challenge specification and participation details are finalised.</p></div></div>
+   <div class="cta-actions">
+    <!-- Replace this placeholder link with the actual registration form URL. -->
+    <a class="btn btn-orange" href="index.html#interest">Express Interest →</a>
+    <a class="btn btn-outline" href="index.html#challenges">Back to Challenges →</a>
+   </div>
+  </div>
+ </div>
+</section>
+</main>
+<footer id="outcomes">
+ <div class="container footer-inner"><span>Agentic AI Grand Challenges &nbsp;—&nbsp; University of Southampton</span><span><a href="index.html">Back to homepage →</a></span></div>
+</footer>
+</body>
+</html>
